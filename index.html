@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#006a4e">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Jalan Nav</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -67,18 +70,24 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--route);outline-
 #map{position:fixed;inset:0;background:var(--bg)}
 .leaflet-container{background:var(--bg);font-family:var(--f-body)}
 .leaflet-control-attribution{font-size:10px}
+.leaflet-bottom{margin-bottom:calc(var(--sheet-h,24px) + env(safe-area-inset-bottom,0px));transition:margin .25s}
+.base-tt-focus,.base-osm-focus{filter:grayscale(1) brightness(1.07) contrast(.8);opacity:.62}
+.sw-focus{background:#eceef0 repeating-linear-gradient(90deg,transparent 0 22px,#fafafa 22px 26px)}
 
-/* ---------- top search ---------- */
-#top{position:fixed;z-index:500;left:0;right:0;top:0;
-  padding:calc(env(safe-area-inset-top,0px) + 10px) max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));
-  display:flex;flex-direction:column;gap:8px;pointer-events:none}
+/* ---------- search bar, at the bottom within thumb reach ---------- */
+#top{position:fixed;z-index:500;left:0;right:0;bottom:0;
+  padding:28px max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(12px,env(safe-area-inset-left,0px));
+  display:flex;flex-direction:column-reverse;gap:8px;pointer-events:none;
+  background:linear-gradient(to top, color-mix(in srgb, var(--bg) 70%, transparent) 40%, transparent)}
 #top>*{pointer-events:auto}
 .searchbox{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:14px;box-shadow:var(--shadow);padding:6px 6px 6px 14px}
+.searchbox input::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
 .searchbox input{flex:1;min-width:0;border:0;background:transparent;color:var(--fg);font:500 16px var(--f-body);padding:8px 0;outline:none}
 .searchbox .brand{font:700 18px var(--f-display);color:var(--signtext);letter-spacing:.02em}
 .iconbtn{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:18px}
 .iconbtn:hover{background:var(--bg)}
-#results{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;max-height:50vh;overflow-y:auto}
+#results{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;max-height:min(50vh,360px);overflow-y:auto}
+#results:not([hidden]) ~ .chips{display:none}
 #results button{display:block;width:100%;text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
 #results button:last-child{border-bottom:0}
 #results b{display:block;font-weight:600}
@@ -162,16 +171,16 @@ h3.sec{margin:18px 0 2px;font:700 18px var(--f-display);letter-spacing:.02em;col
 .sign .road{font-size:13px;opacity:.85;margin-top:2px}
 .next{margin:6px 0 0 8px;display:inline-flex;gap:6px;align-items:center;background:var(--sign-deep);color:var(--sign-ink);font:600 14px var(--f-display);padding:5px 10px;border-radius:8px}
 #alert{margin-top:8px;background:var(--amber);color:#2a1d00;border-radius:12px;padding:10px 14px;font:600 16px var(--f-display);box-shadow:var(--shadow);display:flex;gap:10px;align-items:center}
-#tripbar{position:fixed;z-index:700;left:0;right:0;bottom:0;background:var(--surface);box-shadow:var(--shadow);border-radius:18px 18px 0 0;
+#tripbar{position:fixed;z-index:700;left:0;right:0;bottom:0;background:var(--surface);box-shadow:var(--shadow);border-radius:18px 18px 0 0;column-gap:10px;
   padding:12px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(16px,env(safe-area-inset-left,0px));
-  display:flex;align-items:center;gap:14px}
+  display:flex;align-items:center;gap:10px}
 .speed{flex:none;width:58px;height:58px;border-radius:50%;border:4px solid var(--danger);display:grid;place-items:center;text-align:center;line-height:1}
 .speed b{font:700 22px var(--f-display);font-variant-numeric:tabular-nums}
 .speed small{font-size:9px;color:var(--muted);display:block}
 .eta{flex:1;min-width:0}
 .eta .big{font:700 26px/1 var(--f-display);color:var(--signtext);font-variant-numeric:tabular-nums}
-.eta .sub{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
-.btn.end{flex:none;background:var(--danger);color:#fff;padding:12px 18px}
+.eta .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.btn.end{flex:none;background:var(--danger);color:#fff;padding:12px 14px}
 
 /* ---------- report sheet ---------- */
 .hzgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
@@ -193,7 +202,46 @@ h3.sec{margin:18px 0 2px;font:700 18px var(--f-display);letter-spacing:.02em;col
 .pop b{font:700 16px var(--f-display)}
 .pop .row{margin-top:8px}
 
-#toast{position:fixed;z-index:900;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 110px);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:500;max-width:calc(100% - 32px);text-align:center;opacity:0;transition:opacity .2s;pointer-events:none}
+/* trip planner */
+.stops{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.stop{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:start}
+.stop .sn{width:26px;height:26px;margin-top:9px;border-radius:50%;background:var(--route);color:#fff;display:grid;place-items:center;font:700 13px var(--f-body)}
+.stop.start .sn{background:var(--signtext)}
+.stop .sn.fin{background:transparent;font-size:18px}
+.si{min-width:0;position:relative}
+.si input{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:500 15px var(--f-body)}
+.si .here{padding:11px 0;font-weight:600}
+.sres{margin-top:4px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.sres button{display:block;width:100%;text-align:left;padding:9px 12px;border-bottom:1px solid var(--line)}
+.sres button:last-child{border-bottom:0}
+.sres b{display:block;font-weight:600}.sres span{color:var(--muted);font-size:12px}
+.sres .none{padding:9px 12px;color:var(--muted)}
+.sbtn{display:flex;gap:2px;margin-top:4px}
+.sbtn button{width:30px;height:34px;border-radius:8px;color:var(--muted);font-weight:700}
+.sbtn button:disabled{opacity:.3}
+.addstop{margin-top:8px;align-self:flex-start}
+.tsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.tsum div,.tcost div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tsum b{font:700 22px var(--f-display);font-variant-numeric:tabular-nums}
+.tsum span,.tcost span{font-size:12px;color:var(--muted)}
+.tcost{display:flex;gap:16px;align-items:flex-end;margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--bg);flex-wrap:wrap}
+.tcost b{font:700 20px var(--f-display);font-variant-numeric:tabular-nums}
+.tcost div:first-child span{font-size:14px;color:var(--fg);font-weight:600}
+.legs{margin:12px 0 0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.legs li b{display:block;font-weight:600}.legs li span{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.stoppin{width:26px;height:26px;border-radius:50%;background:var(--route);color:#fff;border:3px solid #fff;display:grid;place-items:center;font:700 12px var(--f-body);box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.chip.plan{background:var(--route);color:#fff}
+/* voice commands */
+.iconbtn.mic svg{width:22px;height:22px}
+.navmic{flex:none;width:44px;height:44px;border-radius:50%;background:var(--bg)}
+.listen{position:fixed;z-index:950;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 90px);
+  background:var(--surface);color:var(--fg);border-radius:18px;box-shadow:var(--shadow);padding:14px 16px;display:flex;gap:14px;align-items:center}
+.lsdot{flex:none;width:52px;height:52px;border-radius:50%;background:var(--danger);color:#fff;display:grid;place-items:center;animation:pulse 1.2s ease-in-out infinite}
+.lsdot svg{width:26px;height:26px}
+.lsbody{min-width:0}.lshint{color:var(--muted);font-size:13px}.lstext{font:600 18px/1.25 var(--f-body);word-wrap:break-word}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,59,43,.45)}50%{box-shadow:0 0 0 12px rgba(217,59,43,0)}}
+@media (prefers-reduced-motion:reduce){.lsdot{animation:none}}
+#toast{position:fixed;z-index:900;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + var(--sheet-h,24px) + 20px);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:500;max-width:calc(100% - 32px);text-align:center;opacity:0;transition:opacity .2s;pointer-events:none}
 #toast.show{opacity:1}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -204,9 +252,10 @@ h3.sec{margin:18px 0 2px;font:700 18px var(--f-display);letter-spacing:.02em;col
 <!-- search -->
 <div id="top">
   <div class="searchbox">
-    <span class="brand">JALAN</span>
+    <span class="brand">GO TO</span>
     <input id="q" type="search" placeholder="Cari destinasi / Search destination" autocomplete="off" enterkeyhint="search">
     <button class="iconbtn" id="clearQ" aria-label="Clear search" hidden>✕</button>
+    <button class="iconbtn mic" id="micBtn" aria-label="Voice command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
     <button class="iconbtn" id="setBtn" aria-label="Settings">⚙</button>
   </div>
   <div id="results" hidden></div>
@@ -255,9 +304,14 @@ h3.sec{margin:18px 0 2px;font:700 18px var(--f-display);letter-spacing:.02em;col
     <div class="sub" id="etaSub">—</div>
     <div class="sub tripcost" id="etaFuel"></div>
   </div>
+  <button class="iconbtn mic navmic" id="navMic" aria-label="Voice command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
   <button class="btn end" id="endBtn">End</button>
 </div>
 
+<div id="listen" class="listen" hidden role="dialog" aria-live="polite">
+  <div class="lsdot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
+  <div class="lsbody"><div id="lsHint" class="lshint"></div><div id="lsText" class="lstext"></div></div>
+</div>
 <div id="toast" role="status"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -346,6 +400,7 @@ const MAP_STYLES = {
   normal:{n:"Normal", d:"Clean light map"},
   dark:  {n:"Dark",   d:"Easy on the eyes at night"},
   clean: {n:"Clean",  d:"Tesla-style charcoal, minimal colour"},
+  focus: {n:"Focus",  d:"Waze-style: the map fades to grey so only your route and its traffic stand out"},
   osm:   {n:"Street detail", d:"OpenStreetMap with every shop and lane"}
 };
 const OSM_ATTR='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
@@ -356,12 +411,12 @@ function applyMapStyle(){
   if(baseLayer) baseLayer.remove();
   let url, opt={maxZoom:19, attribution:OSM_ATTR+" · Routing OSRM"};
   if(kind!=="osm" && k){
-    url=TT+"/map/1/tile/basic/"+(kind==="normal"?"main":"night")+"/{z}/{x}/{y}.png?key="+k+"&tileSize=512";
+    url=TT+"/map/1/tile/basic/"+(kind==="normal"||kind==="focus"?"main":"night")+"/{z}/{x}/{y}.png?key="+k+"&tileSize=512";
     // tileSize=512 here means a sharp high-resolution tile for the same area, shown at normal 256 px size
-    opt={maxZoom:20, attribution:"&copy; TomTom", className: kind==="clean"?"base-tt-clean":""};
+    opt={maxZoom:20, attribution:"&copy; TomTom", className: kind==="clean"?"base-tt-clean" : kind==="focus"?"base-tt-focus" : ""};
   } else {
     url="https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-    opt.className = kind==="dark"?"base-osm-dark" : kind==="clean"?"base-osm-clean" : kind==="normal"?"base-osm-light" : "";
+    opt.className = kind==="dark"?"base-osm-dark" : kind==="clean"?"base-osm-clean" : kind==="focus"?"base-osm-focus" : kind==="normal"?"base-osm-light" : "";
   }
   baseLayer=L.tileLayer(url,opt).addTo(map);
   baseLayer.on("tileerror", ()=>{ if(url.includes("tomtom") && ++baseErrs===8){ toast("TomTom map tiles unavailable, so OpenStreetMap is shown."); applyMapStyle(); } });
@@ -397,7 +452,7 @@ let trafficLayers=[];
 function applyTrafficLayer(){
   trafficLayers.forEach(l=>l.remove()); trafficLayers=[];
   if(!$("layers").hidden) renderLayers();
-  if(!S.ttKey || !S.showTraffic) return;
+  if(!S.ttKey || !S.showTraffic || styleKind()==="focus") return;   // Focus shows traffic on your route only
   const k=encodeURIComponent(S.ttKey);
   // only roads that are slower than normal, drawn as thin lines: no green, no arrows, no incident icons
   trafficLayers.push(L.tileLayer(TT+"/traffic/map/4/tile/flow/relative-delay/{z}/{x}/{y}.png?key="+k+"&thickness=4&tileSize=512",
@@ -493,38 +548,45 @@ function showResults(list){
 }
 function renderChips(){
   const c=$("chips"); c.innerHTML="";
+  const pl=document.createElement("button"); pl.className="chip plan"; pl.textContent="🧭 Plan trip"; pl.onclick=()=>openPlanner(); c.appendChild(pl);
   ["home","work"].forEach(k => { if(S.saved[k]){ const b=document.createElement("button"); b.className="chip home";
     b.textContent=(k==="home"?"🏠 Home":"🏢 Work"); b.onclick=()=>setDest(S.saved[k]); c.appendChild(b); } });
   QUICK.forEach(q => { const b=document.createElement("button"); b.className="chip"; b.textContent=q.name; b.onclick=()=>setDest(q); c.appendChild(b); });
 }
 
 /* ================= routing ================= */
-async function fetchRoutes(from,to,alts=2){
+/* route from → (stops) → to. opts.via overrides the current stops; opts.best asks for the quickest visiting order */
+async function fetchRoutes(from,to,alts=2,opts={}){
+  const pts=[from, ...(opts.via ?? S.via ?? []), to], best=!!opts.best && pts.length>3;
   if(S.ttKey){
-    try{ const r=await fetchTomTom(from,to,alts); S.ttStatus="ok"; return r; }
+    try{ const r=await fetchTomTom(pts,alts,best); S.ttStatus="ok"; return r; }
     catch(e){ S.ttStatus="err"; toast("Live traffic unavailable: "+e.message+". Showing routes without traffic."); }
   }
-  return fetchOSRM(from,to);
+  return fetchOSRM(pts,best);
 }
-async function fetchTomTom(from,to,alts,noToll){
-  const url = TT+"/routing/1/calculateRoute/"+from.lat.toFixed(6)+","+from.lng.toFixed(6)+":"+to.lat.toFixed(6)+","+to.lng.toFixed(6)+
+async function fetchTomTom(pts,alts,best,noToll){
+  if(!Array.isArray(pts)) pts=[pts,alts], alts=best, best=false;          // old (from,to,alts) form
+  if(pts.length>2) alts=0;                                                 // alternatives aren't offered with stops
+  const url = TT+"/routing/1/calculateRoute/"+pts.map(p=>p.lat.toFixed(6)+","+p.lng.toFixed(6)).join(":")+
     "/json?key="+encodeURIComponent(S.ttKey)+"&traffic=true&travelMode=car&routeType=fastest&maxAlternatives="+alts+
     "&instructionsType=text&language=en-GB&computeTravelTimeFor=all&sectionType=traffic"+(noToll?"":"&sectionType=toll")+
-    (S.avoidTolls?"&avoid=tollRoads":"");
+    (best?"&computeBestOrder=true":"")+(S.avoidTolls?"&avoid=tollRoads":"");
   const res = await fetch(url);
   if(!res.ok){
-    if(res.status===400 && !noToll) return fetchTomTom(from,to,alts,true);
+    if(res.status===400 && !noToll) return fetchTomTom(pts,alts,best,true);
     let msg=""; try{ const j=await res.json(); msg=j.detailedError?.message||j.error?.description||""; }catch(e){}
     throw new Error(res.status===403||res.status===401 ? "the TomTom key was rejected" : res.status===429 ? "the free daily limit is used up" : (msg||"error "+res.status));
   }
   const j = await res.json();
   if(!j.routes?.length) throw new Error("no route found");
-  return j.routes.map(prepTT);
+  const order = j.optimizedWaypoints ? j.optimizedWaypoints.slice().sort((a,b)=>a.optimizedIndex-b.optimizedIndex).map(w=>w.providedIndex) : null;
+  return j.routes.map(r=>{ const R=prepTT(r); R.order=order; return R; });
 }
 function mapMan(x){
   const M=x.maneuver||"", ex=x.roundaboutExitNumber;
   if(M==="DEPART") return {type:"depart"};
-  if(M.startsWith("ARRIVE")||M==="WAYPOINT_REACHED") return {type:"arrive"};
+  if(M.startsWith("ARRIVE")) return {type:"arrive"};
+  if(M.startsWith("WAYPOINT")) return {type:"waypoint"};
   if(M.startsWith("ROUNDABOUT")) return {type:"roundabout", exit:ex, modifier:{ROUNDABOUT_LEFT:"left",ROUNDABOUT_RIGHT:"right",ROUNDABOUT_BACK:"uturn"}[M]||"straight"};
   if(M==="MOTORWAY_EXIT_LEFT") return {type:"off ramp", modifier:"slight left"};
   if(M==="MOTORWAY_EXIT_RIGHT") return {type:"off ramp", modifier:"slight right"};
@@ -537,7 +599,9 @@ function mapMan(x){
   return {type:"continue", modifier:"straight"};
 }
 function prepTT(r){
-  const pts=[]; r.legs.forEach((l,li)=>l.points.forEach((p,j)=>{ if(li&&!j) return; pts.push({lat:p.latitude,lng:p.longitude}); }));
+  const pts=[], legEnd=[]; r.legs.forEach((l,li)=>{ l.points.forEach((p,j)=>{ if(li&&!j) return; pts.push({lat:p.latitude,lng:p.longitude}); }); legEnd.push(pts.length-1); });
+  const one=r.legs.length===1;
+  const legs=r.legs.map(l=>{ const m=l.summary||(one? r.summary : {}); return {distance:m.lengthInMeters||0, duration:m.travelTimeInSeconds||0, delay:m.trafficDelayInSeconds||0}; });
   const cum=[0]; for(let i=1;i<pts.length;i++) cum[i]=cum[i-1]+hav(pts[i-1],pts[i]);
   const idxAt = off => { let lo=0, hi=cum.length-1; while(lo<hi){ const m=(lo+hi)>>1; if(cum[m]<off-1) lo=m+1; else hi=m; } return lo; };
   const steps=[], stepStart=[], stepT=[];
@@ -554,7 +618,7 @@ function prepTT(r){
   const traffic = sec.filter(s=>s.sectionType==="TRAFFIC").map(s=>({a:s.startPointIndex,b:s.endPointIndex,mag:s.magnitudeOfDelay??0,delay:s.delayInSeconds||0,cat:s.simpleCategory||"JAM",kmh:s.effectiveSpeedInKmh}));
   const toll = sec.some(s=>s.sectionType==="TOLL"||s.sectionType==="TOLL_ROAD");
   const sm=r.summary;
-  return finish({steps, pts, cum, stepStart, stepT, toll, traffic, live:true,
+  return finish({steps, pts, cum, stepStart, stepT, toll, traffic, live:true, legs, legEnd,
     distance:sm.lengthInMeters, duration:sm.travelTimeInSeconds, delay:sm.trafficDelayInSeconds||0,
     free:sm.noTrafficTravelTimeInSeconds||sm.travelTimeInSeconds, at:Date.now()});
 }
@@ -565,8 +629,16 @@ function finish(R){
   for(let i=1;ok&&i<R.stepT.length;i++) if(R.stepT[i]<R.stepT[i-1]) ok=false;
   R.tOk=ok; return R;
 }
-async function fetchOSRM(from,to){
-  const base = OSRM+from.lng+","+from.lat+";"+to.lng+","+to.lat+"?overview=full&geometries=geojson&steps=true&alternatives=true";
+async function fetchOSRM(pts,best){
+  if(!Array.isArray(pts)) pts=[pts,best], best=false;
+  const coords=pts.map(p=>p.lng+","+p.lat).join(";");
+  if(best){   // OSRM's trip service finds the quickest order between a fixed start and end
+    try{ const j=await (await fetch(OSRM.replace("/route/","/trip/")+coords+"?source=first&destination=last&roundtrip=false&overview=full&geometries=geojson&steps=true")).json();
+      if(j.code==="Ok" && j.trips?.length){ const R=prep(j.trips[0]);
+        R.order = pts.slice(1,-1).map((_,k)=>k).sort((a,b)=>j.waypoints[a+1].waypoint_index-j.waypoints[b+1].waypoint_index); return [R]; } }catch(e){}
+    toast("Couldn't work out the best order, so your order is used.");
+  }
+  const base = OSRM+coords+"?overview=full&geometries=geojson&steps=true&alternatives="+(pts.length===2);
   let j;
   if(S.avoidTolls){
     try{ j = await (await fetch(base+"&exclude=toll")).json(); }catch(e){ j=null; }
@@ -577,13 +649,19 @@ async function fetchOSRM(from,to){
   return j.routes.map(prep);
 }
 function prep(r){
-  const steps = r.legs.flatMap(l=>l.steps), pts=[], stepStart=[];
-  steps.forEach(s => { stepStart.push(Math.max(0,pts.length-1));
-    s.geometry.coordinates.forEach((xy,j) => { if(pts.length && j===0) return; pts.push({lat:xy[1], lng:xy[0]}); }); });
+  const steps=[], pts=[], stepStart=[], legEnd=[], last=r.legs.length-1;
+  r.legs.forEach((l,li)=>{ l.steps.forEach(s0=>{
+      let s=s0, t=s0.maneuver.type;
+      if(t==="arrive" && li<last) s={...s0, maneuver:{...s0.maneuver, type:"waypoint"}};        // a stop on the way
+      else if(t==="depart" && li>0) s={...s0, maneuver:{...s0.maneuver, type:"continue", modifier:"straight"}};
+      steps.push(s); stepStart.push(Math.max(0,pts.length-1));
+      s.geometry.coordinates.forEach((xy,j) => { if(pts.length && j===0) return; pts.push({lat:xy[1], lng:xy[0]}); }); });
+    legEnd.push(pts.length-1); });
+  const legs=r.legs.map(l=>({distance:l.distance, duration:l.duration, delay:0}));
   const cum=[0]; for(let i=1;i<pts.length;i++) cum[i]=cum[i-1]+hav(pts[i-1],pts[i]);
   const toll = steps.some(s => (s.intersections||[]).some(x => (x.classes||[]).includes("toll")));
   const stepT=[]; let t=0; steps.forEach(s=>{ stepT.push(t); t+=s.duration||0; });
-  return finish({steps, pts, cum, stepStart, stepT, toll, traffic:[], live:false, distance:r.distance, duration:r.duration, delay:0, free:r.duration, at:Date.now()});
+  return finish({steps, pts, cum, stepStart, stepT, toll, traffic:[], live:false, legs, legEnd, distance:r.distance, duration:r.duration, delay:0, free:r.duration, at:Date.now()});
 }
 /* time left from a point on the route, using per-step travel times (these include traffic) */
 function timeLeft(R, along, cur){
@@ -607,7 +685,8 @@ function trafficTag(r){
   if(m<2) return '<span class="tag ok">Light traffic</span>';
   return '<span class="tag '+(m>=10?"bad":"mod")+'">+'+m+' min traffic</span>';
 }
-async function setDest(place){
+async function setDest(place, keepStops){
+  if(!keepStops){ S.via=[]; drawStops(); }
   S.dest=place; $("results").hidden=true; S.freeFollow=false; $("locBtn").classList.remove("on"); resetNorth();
   if(destMarker) destMarker.remove();
   destMarker = L.marker(place,{icon:L.divIcon({className:"",html:'<div class="destpin"></div>',iconSize:[22,22],iconAnchor:[11,11]})}).addTo(map);
@@ -616,7 +695,7 @@ async function setDest(place){
   openSheet('<div class="dest"><h2>'+esc(place.name)+'</h2><p>'+esc(place.sub||"")+'</p></div><p class="hint">Finding routes…</p>', closeRoute);
   try{
     S.routes = await fetchRoutes(from, place); S.sel=0; drawRoutes(); renderRouteSheet();
-    map.fitBounds(L.latLngBounds(S.routes[0].pts), {paddingTopLeft:[30,140], paddingBottomRight:[30, sheetH()+30]});
+    map.fitBounds(L.latLngBounds(S.routes[0].pts), {paddingTopLeft:[30,60], paddingBottomRight:[30, sheetH()+30]});
   }catch(e){
     openSheet('<div class="dest"><h2>'+esc(place.name)+'</h2></div><p class="hint">No driving route found. '+esc(e.message)+'</p><div class="row"><button class="btn" onclick="closeRoute()">Close</button></div>', closeRoute);
   }
@@ -626,6 +705,16 @@ function drawRoutes(){
   S.routes.forEach((r,i) => { if(i===S.sel) return;
     routeLayers(r,false).forEach(l=>{ l.addTo(map); l.on("click",()=>{S.sel=i; drawRoutes(); renderRouteSheet();}); routeLines.push(l); }); });
   routeLayers(S.routes[S.sel],true).forEach(l=>{ l.addTo(map); routeLines.push(l); });
+}
+/* numbered pins for stops on the way */
+let stopLayer=null;
+function drawStops(){ if(!stopLayer) stopLayer=L.layerGroup().addTo(map); stopLayer.clearLayers();
+  (S.via||[]).forEach((v,i)=> L.marker(v,{icon:L.divIcon({className:"",html:'<div class="stoppin">'+(i+1)+'</div>',iconSize:[26,26],iconAnchor:[13,13]})}).addTo(stopLayer)); }
+/* stops not yet passed on the current route */
+function remainingVia(near){
+  if(!S.via?.length || !S.R?.legEnd) return S.via||[];
+  near = near || nearest(S.R, S.pos||S.R.pts[0], S.lastIdx);
+  return S.via.filter((v,k)=> S.R.legEnd[k]==null || near.i < S.R.legEnd[k]-1);
 }
 function drawNavRoute(){ routeLines.forEach(l=>l.remove()); routeLines=routeLayers(S.R,true).map(l=>l.addTo(map)); }
 function getVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
@@ -642,7 +731,7 @@ function renderRouteSheet(){
   const live=S.routes[0]?.live;
   h+='</div><label class="toggle"><input type="checkbox" id="tollChk"'+(S.avoidTolls?" checked":"")+'> Avoid toll roads</label>'+
      '<div class="row"><button class="btn go" id="goBtn">GO</button><button class="btn" id="simBtn">Simulate</button></div>'+
-     '<div class="row"><button class="btn small" id="saveHome">Set as Home</button><button class="btn small" id="saveWork">Set as Work</button><button class="btn small" onclick="closeRoute()">Close</button></div>'+
+     '<div class="row"><button class="btn small" id="saveHome">Set as Home</button><button class="btn small" id="saveWork">Set as Work</button><button class="btn small" id="addStops">+ Stops</button><button class="btn small" onclick="closeRoute()">Close</button></div>'+
      '<p class="hint">'+(live ? "Live traffic by TomTom, checked "+clock(new Date(S.routes[0].at))+". Times include current jams."
         : S.ttKey ? "Live traffic couldn't load, so times are free-flow estimates."
         : "No live traffic yet. Times are free-flow estimates. Tap ⚙ to add a free traffic key.")+'</p>';
@@ -653,9 +742,10 @@ function renderRouteSheet(){
   $("simBtn").onclick = () => startNav(true);
   $("saveHome").onclick = () => savePlace("home");
   $("saveWork").onclick = () => savePlace("work");
+  $("addStops").onclick = () => { const d=S.dest; routeLines.forEach(l=>l.remove()); routeLines=[]; S.routes=[]; openPlanner(d); };
 }
 function savePlace(k){ S.saved[k]={...S.dest, name:k==="home"?"Home":"Work"}; store.set("saved",S.saved); renderChips(); toast((k==="home"?"Home":"Work")+" saved"); }
-function closeRoute(){ closeSheet(); routeLines.forEach(l=>l.remove()); routeLines=[]; if(destMarker) destMarker.remove(); S.dest=null; S.routes=[]; }
+function closeRoute(){ closeSheet(); routeLines.forEach(l=>l.remove()); routeLines=[]; if(destMarker) destMarker.remove(); S.dest=null; S.routes=[]; S.via=[]; drawStops(); }
 window.closeRoute = closeRoute;
 
 /* ================= sheet ================= */
@@ -664,7 +754,7 @@ function openSheet(html, onClose){ const s=$("sheet");
   s.innerHTML='<div class="sheethead" id="sheetHead"><div class="grab"></div><button class="sheetx" id="sheetX" aria-label="Close">✕</button></div>'+html;
   s.classList.remove("closed"); s.style.transform="";
   $("sheetX").onclick=dismissSheet; wireSwipe($("sheetHead"));
-  if(!S.sheetPushed){ try{ history.pushState({sheet:1},""); S.sheetPushed=true; }catch(e){} }
+  if(!S.sheetPushed){ try{ if(!(history.state && history.state.sheet)) history.pushState({sheet:1},""); S.sheetPushed=true; }catch(e){} }
   requestAnimationFrame(()=>{ const h=sheetH(); document.documentElement.style.setProperty("--sheet-h", h+"px"); $("fabs").hidden = h > innerHeight*0.5; }); }
 function dismissSheet(){ const f=S.sheetClose||closeSheet; f(); }
 /* drag the handle down to close */
@@ -680,7 +770,11 @@ addEventListener("popstate", ()=>{
   if(!$("sheet").classList.contains("closed")){ S.sheetPushed=false; dismissSheet(); }
 });
 function closeSheet(){ $("sheet").classList.add("closed");
-  if(S.sheetPushed){ S.sheetPushed=false; S.ignorePop=true; try{ history.back(); }catch(e){ S.ignorePop=false; } } $("fabs").hidden=false; document.documentElement.style.setProperty("--sheet-h","24px"); }
+  // only step back if the current history entry is the one this sheet added, so we never leave the app
+  if(S.sheetPushed){ S.sheetPushed=false; if(history.state && history.state.sheet){ S.ignorePop=true; try{ history.back(); }catch(e){ S.ignorePop=false; } } } $("fabs").hidden=false; setRest(); }
+/* space taken at the bottom when no sheet is open: the search bar, or the trip bar while driving */
+function restH(){ if(S.nav) return $("tripbar").offsetHeight||84; const t=$("top"); return t.hidden? 24 : Math.max(24, t.offsetHeight-16); }
+function setRest(){ if($("sheet").classList.contains("closed")) document.documentElement.style.setProperty("--sheet-h", restH()+"px"); }
 function sheetH(){ const s=$("sheet"); return s.classList.contains("closed")?0:s.offsetHeight; }
 
 /* ================= voice packs (instructions + local dialects) =================
@@ -717,54 +811,6 @@ const PACKS = {
       jam:["Sabar ya.","Tarik nafas, lepas perlahan."],
       bored:["Mengantuk ke? Kalau ya, berhenti rehat dulu.","Jangan lupa minum air bila berhenti nanti.","Sikit lagi je, bertahan ya."],
       turn:["",""," perlahan-lahan"] } },
-  manglish:{ code:"MGL", name:"Manglish", base:"en", langs:["en-my","en-gb","en-au","en-us","en"], note:"English voice with Malaysian lah-lah.",
-    mod:{left:"Turn left lah",right:"Turn right lah","slight left":"Keep left a bit","slight right":"Keep right a bit","sharp left":"Sharp left ah","sharp right":"Sharp right ah",uturn:"U-turn lah",straight:"Go straight only"},
-    keep:{left:"Keep left",right:"Keep right","slight left":"Keep left","slight right":"Keep right",straight:"Go straight only"},
-    depart:"Ok, jom go", arrive:"Reach already!", onto:" into ", exit:"Take the exit", exitL:"Exit on the left side", exitR:"Exit on the right side",
-    ramp:"Take the ramp", merge:"Merge in", rb:n=>"At the roundabout, take exit "+n+" ah", rbx:"Exit the roundabout", inX:d=>"Another "+d+", ",
-    reroute:"Wrong road lah, recalculating", start:"Ok boss, jom go", hazard:h=>"Got "+h+" in front, careful ah", then:"Then: ", voiceOn:"Voice on liao",
-    um:" metres", ukm:" k-m", ukm1:" k-m",
-    hz:{police:"mata",accident:"accident",jam:"jam",flood:"flood",pothole:"pothole",works:"road works",camera:"AWAS camera",object:"something on the road"},
-    jam:{closed:"Road closed",works:"Road works",heavy:"Jam teruk",slow:"Slow traffic"}, jamSay:(k,m)=>k+" in front, about "+m+" minutes late ah",
-    faster:m=>"Found faster road, save "+m+" minutes. Steady!", cost:x=>"Petrol money this trip about "+x+" ringgit only.",
-    fun:{ start:["Jom go! Seat belt on, don't drive like Mat Rempit ah.","Ok boss, let's go. Don't play handphone while driving hor."],
-      reroute:["Aiyo, wrong road again! Never mind, I calculate again lah.","You don't listen to me one is it? Ok lah, find other road."],
-      arrive:["Reach already! Not bad, your driving quite power.","Sampai liao! Go makan first lah."],
-      jam:["Sabar ah.","Typical lah, relax."],
-      bored:["Sleepy or not? Don't sleep ah, I'm here.","Hungry already? Later go mamak, teh tarik one.","Long drive ah? Sabar, nearly reach already."],
-      turn:["",""," hor"," ok?"] } },
-  kelantan:{ code:"KTN", name:"Kecek Kelate", base:"ms", langs:["ms-my","ms","id-id","id"], note:"Kelantan slang, read by the Malay voice.",
-    mod:{left:"Belok kiri",right:"Belok kane","slight left":"Ikut kiri sikit","slight right":"Ikut kane sikit","sharp left":"Belok kiri tajae","sharp right":"Belok kane tajae",uturn:"Pusing balik",straight:"Gi teruh"},
-    keep:{left:"Ikut kiri",right:"Ikut kane","slight left":"Ikut kiri","slight right":"Ikut kane",straight:"Gi teruh"},
-    depart:"Jom gi", arrive:"Doh sapa doh", onto:" masuk ", exit:"Keluar susur", exitL:"Keluar susur kiri", exitR:"Keluar susur kane",
-    ramp:"Masuk susur", merge:"Masuk jale beso", rb:n=>"Kak bulate, ambik simpe nombor "+n, rbx:"Keluar bulate", inX:d=>"Lagi "+d+", ",
-    reroute:"Demo silap jale, kawe kiro balik", start:"Jom gi, kito jale", hazard:h=>h+" depe tu, jago-jago", then:"Lepah tu: ", voiceOn:"Suara doh buka",
-    um:" meter", ukm:" kilometer",
-    hz:{police:"Polis",accident:"Kemalange",jam:"Sesak",flood:"Bah",pothole:"Lubang jale",works:"Kijo jale",camera:"Kamera AWAS",object:"Bende atas jale"},
-    jam:{closed:"Jale tutup",works:"Kijo jale",heavy:"Sesak teruk",slow:"Kereta banyok"}, jamSay:(k,m)=>k+" depe ni, lambat lebih kurang "+m+" minit",
-    faster:m=>"Kawe jumpo jale lagi cepat, jimat "+m+" minit", cost:x=>"Habih pitih minyak dale "+x+" ringgit.",
-    fun:{ start:["Jom gi! Pakai tali pinggang, jange kelik kalut.","Bismillah, kito jale. Jange laju sangat, polis ado mano-mano."],
-      reroute:["Aih, demo ni sesat pulok. Takpo, kawe kiro balik.","Bakpo demo tak dengar kawe kecek? Takpo, kawe cari jale lain."],
-      arrive:["Doh sapa doh! Molek sungguh demo bawok.","Sapa doh. Gi la makan nasi kerabu."],
-      jam:["Sabar la.","Jange kalut, rileks dulu."],
-      bored:["Demo dok ngantuk ko? Jange tido, kawe ado sini.","Kalu lapar, singgah la makan solok lada.","Sedap jugok kalu ado budu sekarang ni."],
-      turn:["",""," molek-molek"] } },
-  kedah:{ code:"KDH", name:"Loghat Kedah", base:"ms", langs:["ms-my","ms","id-id","id"], note:"Northern slang, read by the Malay voice.",
-    mod:{left:"Belok kiri",right:"Belok kanan","slight left":"Ikut kiri sikit","slight right":"Ikut kanan sikit","sharp left":"Belok kiri tajam","sharp right":"Belok kanan tajam",uturn:"Pusing balik",straight:"Pi teruih"},
-    keep:{left:"Ikut kiri",right:"Ikut kanan","slight left":"Ikut kiri","slight right":"Ikut kanan",straight:"Pi teruih"},
-    depart:"Jom pi", arrive:"Dah sampai dah", onto:" masuk ", exit:"Keluaq susur", exitL:"Keluaq susur kiri", exitR:"Keluaq susur kanan",
-    ramp:"Masuk susur", merge:"Masuk jalan besaq", rb:n=>"Kat bulatan, ambik simpang nombor "+n, rbx:"Keluaq bulatan", inX:d=>"Lagi "+d+", ",
-    reroute:"Hang salah jalan, cek kira balik", start:"Jom pi, cek tunjuk jalan", hazard:h=>h+" kat depan, hati-hati na", then:"Lepaih tu: ", voiceOn:"Suara dah bukak",
-    um:" meter", ukm:" kilometer",
-    hz:{police:"Polis",accident:"Eksiden",jam:"Jem",flood:"Ayaq bah",pothole:"Lubang jalan",works:"Keja jalan",camera:"Kamera AWAS",object:"Barang atas jalan"},
-    jam:{closed:"Jalan tutup",works:"Keja jalan",heavy:"Jem teruk",slow:"Keta banyak"}, jamSay:(k,m)=>k+" kat depan, lambat dalam "+m+" minit",
-    faster:m=>"Cek jumpa jalan lagi laju, jimat "+m+" minit", cost:x=>"Habeh duit minyak lebih kurang "+x+" ringgit.",
-    fun:{ start:["Jom pi! Pakai tali pinggang, jangan dok main fon.","Mai kita pi. Bawak elok-elok, satgi polis tahan."],
-      reroute:["Awat hang pi situ? Pi mai pi mai tang tu ja. Takpa, cek kira balik.","Haih, hang ni tak dengaq cakap. Cek cari jalan lain."],
-      arrive:["Dah sampai dah! Pandai jugak hang bawak.","Sampai dah. Pi la minum teh tarik sat."],
-      jam:["Sabaq na.","Buat-buat relaks."],
-      bored:["Hang dok mengantuk ka? Jangan tidoq, cek ada ni.","Kalau lapaq, singgah la makan laksa Kedah.","Lama lagi ka? Sabaq, satgi sampai."],
-      turn:["",""," na"] } },
   hokkien:{ code:"HKN", name:"Penang Hokkien", base:"en", langs:["ms-my","ms","id-id","id"], note:"Romanised Hokkien read by the Malay voice. No phone has a real Hokkien voice, so the accent is approximate.",
     mod:{left:"Wat to chiu",right:"Wat chia chiu","slight left":"Kia to chiu","slight right":"Kia chia chiu","sharp left":"Wat to chiu","sharp right":"Wat chia chiu",uturn:"U-turn tng lai",straight:"Tit tit ki"},
     keep:{left:"Kia to chiu",right:"Kia chia chiu","slight left":"Kia to chiu","slight right":"Kia chia chiu",straight:"Tit tit ki"},
@@ -796,8 +842,69 @@ const PACKS = {
       arrive:["到咗喇！揸得幾好喔。","到喇到喇，快啲去食碗肉骨茶。"],
       jam:["慢慢嚟啦。","飲啖水，冷靜啲。"],
       bored:["係咪眼瞓啊？唔好瞓著啊，我陪住你。","肚餓未？等陣去食咖喱麵啦。","揸車要專心，唔好睇手機喔。"],
-      turn:["","","，小心啲"] } }
+      turn:["","","，小心啲"] } },
+  mandarin:{ code:"华", name:"华语 Mandarin", base:"en", langs:["zh-cn","cmn","zh-sg","zh-my"], fallback:["zh-tw","zh-hk","zh"], note:"Needs a Chinese (Mandarin) voice on your phone.",
+    mod:{left:"左转",right:"右转","slight left":"靠左","slight right":"靠右","sharp left":"向左急转","sharp right":"向右急转",uturn:"掉头",straight:"直行"},
+    keep:{left:"靠左行驶",right:"靠右行驶","slight left":"靠左行驶","slight right":"靠右行驶",straight:"直行"},
+    depart:"出发", arrive:"已到达目的地", onto:" 进入 ", exit:"从出口离开", exitL:"从左侧出口离开", exitR:"从右侧出口离开",
+    ramp:"进入匝道", merge:"并入主路", rb:n=>"在环岛走第"+n+"个出口", rbx:"驶出环岛", inX:d=>d+"后，",
+    reroute:"已偏离路线，正在重新计算", start:"开始导航", hazard:h=>"前方有"+h+"，请注意", then:"然后：", voiceOn:"语音已开启",
+    um:"米", ukm:"公里", sep:"。",
+    hz:{police:"警察",accident:"车祸",jam:"塞车",flood:"积水",pothole:"坑洞",works:"道路施工",camera:"测速摄像头",object:"杂物"},
+    jam:{closed:"道路封闭",works:"道路施工",heavy:"严重塞车",slow:"车流缓慢"}, jamSay:(k,m)=>"前方"+k+"，大约延误"+m+"分钟",
+    faster:m=>"找到更快的路线，节省"+m+"分钟", cost:x=>"这趟油钱大约"+x+"令吉",
+    fun:{ start:["出发咯！系好安全带，别玩手机哦。","走啦走啦，路上小心！"],
+      reroute:["哎呀，又走错路了！没关系，我重新算。","你是不是没听我讲？好啦，换条路。"],
+      arrive:["到啦！开得不错嘛。","到咯，快去吃碗肉骨茶吧。"],
+      jam:["慢慢来啦。","喝口水，冷静一下。"],
+      bored:["是不是想睡觉？别睡哦，我陪着你。","肚子饿了吗？等下去吃咖喱面吧。","专心开车，不要看手机哦。"],
+      turn:["","","，小心点"] } },
+  tamil:{ code:"த", name:"தமிழ் Tamil", base:"en", langs:["ta-my","ta-in","ta-sg","ta-lk","ta"], note:"Needs the Tamil voice on your phone.",
+    mod:{left:"இடது பக்கம் திரும்பவும்",right:"வலது பக்கம் திரும்பவும்","slight left":"சற்று இடது பக்கம் செல்லவும்","slight right":"சற்று வலது பக்கம் செல்லவும்","sharp left":"கூர்மையாக இடது பக்கம் திரும்பவும்","sharp right":"கூர்மையாக வலது பக்கம் திரும்பவும்",uturn:"யு-டர்ன் செய்யவும்",straight:"நேராகச் செல்லவும்"},
+    keep:{left:"இடது பக்கமாகச் செல்லவும்",right:"வலது பக்கமாகச் செல்லவும்","slight left":"இடது பக்கமாகச் செல்லவும்","slight right":"வலது பக்கமாகச் செல்லவும்",straight:"நேராகச் செல்லவும்"},
+    depart:"பயணத்தைத் தொடங்குங்கள்", arrive:"நீங்கள் சேருமிடத்தை அடைந்துவிட்டீர்கள்", onto:" ", ontoFn:(s,r)=>r+" நோக்கி "+s,
+    exit:"வெளியேறும் பாதையில் செல்லவும்", exitL:"இடது பக்க வெளியேறும் பாதையில் செல்லவும்", exitR:"வலது பக்க வெளியேறும் பாதையில் செல்லவும்",
+    ramp:"இணைப்புச் சாலையில் செல்லவும்", merge:"பிரதான சாலையில் இணையவும்", rb:n=>"சுற்றுவட்டத்தில் "+n+"-வது வெளியேறும் பாதையில் செல்லவும்", rbx:"சுற்றுவட்டத்திலிருந்து வெளியேறவும்", inX:d=>d+" தூரத்தில், ",
+    reroute:"பாதை மாறிவிட்டது, மீண்டும் கணக்கிடுகிறேன்", start:"வழிகாட்டல் தொடங்குகிறது", hazard:h=>"முன்னால் "+h+", கவனமாக இருங்கள்", then:"பிறகு: ", voiceOn:"குரல் இயக்கப்பட்டது",
+    um:" மீட்டர்", ukm:" கிலோமீட்டர்",
+    hz:{police:"போலீஸ்",accident:"விபத்து",jam:"போக்குவரத்து நெரிசல்",flood:"வெள்ளம்",pothole:"சாலைக் குழி",works:"சாலைப் பணி",camera:"AWAS கேமரா",object:"சாலையில் பொருள்"},
+    jam:{closed:"சாலை மூடப்பட்டுள்ளது",works:"சாலைப் பணி",heavy:"கடும் நெரிசல்",slow:"மெதுவான போக்குவரத்து"}, jamSay:(k,m)=>"முன்னால் "+k+", சுமார் "+m+" நிமிடம் தாமதம்",
+    faster:m=>"வேகமான பாதை கிடைத்தது, "+m+" நிமிடம் மிச்சம்", cost:x=>"இந்தப் பயணத்தின் எரிபொருள் செலவு சுமார் "+x+" ரிங்கிட்",
+    fun:{ start:["போலாம்! சீட் பெல்ட் போடுங்க, போன் பார்க்காதீங்க.","சரி, கிளம்பலாம். பத்திரமா ஓட்டுங்க!"],
+      reroute:["அய்யோ, வழி தவறிட்டீங்களே! பரவாயில்லை, மறுபடி கணக்கு போடுறேன்.","நான் சொன்னதைக் கேட்கலையா? சரி, வேற வழி பார்க்கலாம்."],
+      arrive:["வந்தாச்சு! நல்லா ஓட்டினீங்க.","வந்தாச்சு. போய் ஒரு தே தாரிக் குடிங்க."],
+      jam:["பொறுமையா இருங்க.","கொஞ்சம் தண்ணி குடிங்க, ரிலாக்ஸ்."],
+      bored:["தூக்கம் வருதா? தூங்காதீங்க, நான் இருக்கேன்.","பசிக்குதா? அப்புறம் ரொட்டி சானாய் சாப்பிடலாம்.","கவனமா ஓட்டுங்க, போன் பார்க்காதீங்க."],
+      turn:["","",""] } }
 };
+/* extras for every pack: stop-over phrase, speech-recognition language, and replies to voice commands */
+const PACK_X = {
+  en:{ stop:"Arrive at your stop", asr:"en-GB",
+    v:{ listen:"Listening… say “navigate to KLCC”", notFound:q=>"I couldn't find "+q, going:(n,d)=>"Going to "+n+", "+d, reported:h=>h+" reported, thank you",
+        ended:"Navigation ended", noSaved:k=>"Set your "+k+" first", eta:(c,d)=>"You'll arrive at "+c+", in "+d, cost:(a,s)=>"This trip costs about "+a+" ringgit"+(s?", or "+s+" with subsidy":""),
+        stopAdded:n=>"Stop added: "+n, noNav:"You're not navigating right now", didnt:"Sorry, I didn't catch that" } },
+  ms:{ stop:"Tiba di hentian", asr:"ms-MY",
+    v:{ listen:"Sedang mendengar… sebut “bawa saya ke KLCC”", notFound:q=>"Saya tak jumpa "+q, going:(n,d)=>"Menuju ke "+n+", "+d, reported:h=>h+" dilaporkan, terima kasih",
+        ended:"Navigasi ditamatkan", noSaved:k=>"Tetapkan "+(k==="Home"?"Rumah":"Tempat kerja")+" dahulu", eta:(c,d)=>"Anda akan tiba pada "+c+", dalam "+d, cost:(a,s)=>"Kos perjalanan lebih kurang "+a+" ringgit"+(s?", atau "+s+" dengan subsidi":""),
+        stopAdded:n=>"Hentian ditambah: "+n, noNav:"Navigasi belum bermula", didnt:"Maaf, saya tak dengar dengan jelas" } },
+  hokkien:{ stop:"Kau stop liau", asr:"en-GB",
+    v:{ listen:"Listening… say “navigate to KLCC”", notFound:q=>"Gua chue bo "+q, going:(n,d)=>"Ki "+n+", "+d, reported:h=>h+" report liau, kam sia",
+        ended:"Navigation tng liau", noSaved:k=>"Set your "+k+" first", eta:(c,d)=>c+" kau, ko "+d, cost:(a,s)=>"Chit tng iu chi "+a+" ringgit"+(s?", subsidy "+s:""),
+        stopAdded:n=>"Ka stop: "+n, noNav:"Bo teh navigate", didnt:"Pai seh, gua bo tia ching" } },
+  canto:{ stop:"到咗中途站", asr:"yue-Hant-HK",
+    v:{ listen:"聽緊… 講「導航去 KLCC」", notFound:q=>"搵唔到"+q, going:(n,d)=>"而家去"+n+"，"+d, reported:h=>"已經報告"+h+"，多謝",
+        ended:"導航結束", noSaved:k=>"請先設定"+(k==="Home"?"屋企":"公司"), eta:(c,d)=>c+"到，仲有"+d, cost:(a,s)=>"今次油錢大約"+a+"令吉"+(s?"，有津貼就"+s+"令吉":""),
+        stopAdded:n=>"加咗站："+n, noNav:"而家冇導航緊", didnt:"唔好意思，聽唔清楚" } },
+  mandarin:{ stop:"到达途经点", asr:"cmn-Hans-CN",
+    v:{ listen:"正在听… 说「导航到 KLCC」", notFound:q=>"找不到"+q, going:(n,d)=>"前往"+n+"，"+d, reported:h=>"已报告"+h+"，谢谢",
+        ended:"导航已结束", noSaved:k=>"请先设定"+(k==="Home"?"住家":"公司"), eta:(c,d)=>c+"到达，还有"+d, cost:(a,s)=>"这趟油钱大约"+a+"令吉"+(s?"，用津贴是"+s+"令吉":""),
+        stopAdded:n=>"已加入途经点："+n, noNav:"现在没有在导航", didnt:"不好意思，没听清楚" } },
+  tamil:{ stop:"நிறுத்தத்தை அடைந்துவிட்டீர்கள்", asr:"ta-MY",
+    v:{ listen:"கேட்கிறேன்… “KLCC க்கு வழிகாட்டு” என்று சொல்லுங்கள்", notFound:q=>q+" கிடைக்கவில்லை", going:(n,d)=>n+" நோக்கிச் செல்கிறோம், "+d, reported:h=>h+" தெரிவிக்கப்பட்டது, நன்றி",
+        ended:"வழிகாட்டல் நிறுத்தப்பட்டது", noSaved:k=>"முதலில் "+(k==="Home"?"வீட்டை":"வேலை இடத்தை")+" அமைக்கவும்", eta:(c,d)=>c+" மணிக்கு வந்து சேர்வீர்கள், இன்னும் "+d, cost:(a,s)=>"இந்தப் பயணச் செலவு சுமார் "+a+" ரிங்கிட்"+(s?", மானியத்துடன் "+s:""),
+        stopAdded:n=>"நிறுத்தம் சேர்க்கப்பட்டது: "+n, noNav:"இப்போது வழிகாட்டல் இல்லை", didnt:"மன்னிக்கவும், சரியாகக் கேட்கவில்லை" } }
+};
+Object.entries(PACK_X).forEach(([k,x])=>Object.assign(PACKS[k],x));
 const P = () => PACKS[S.lang] || PACKS.en;
 const BASE = () => P().base;
 const pick = a => a[Math.floor(Math.random()*a.length)];
@@ -814,6 +921,7 @@ function instr(step){
   switch(m.type){
     case "depart": s=t.depart; break;
     case "arrive": s=t.arrive; withRoad=false; break;
+    case "waypoint": s=t.stop; withRoad=false; break;
     case "roundabout": case "rotary": s=m.exit? t.rb(m.exit) : t.mod[mod]; break;
     case "exit roundabout": case "exit rotary": s=t.rbx; break;
     case "off ramp": s=mod.includes("left")? t.exitL : mod.includes("right")? t.exitR : t.exit; break;
@@ -823,14 +931,15 @@ function instr(step){
     case "new name": case "continue": s=mod==="straight"? t.mod.straight : t.mod[mod]; break;
     default: s=t.mod[mod]||t.mod.straight;
   }
-  return {text:s, road: withRoad? road : "", full: s+(withRoad&&road? t.onto+road : "")};
+  const full = withRoad&&road ? (t.ontoFn? t.ontoFn(s,road) : s+t.onto+road) : s;
+  return {text:s, road: withRoad? road : "", full};
 }
 function spokenDist(m){ const t=P();
   if(m>=950){ const k=Math.round(m/100)/10; return k+(k===1&&t.ukm1? t.ukm1 : t.ukm); }
   return Math.max(100,Math.round(m/100)*100)+t.um; }
 function arrowSVG(step){
   const m=step.maneuver;
-  if(m.type==="arrive") return '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="14" fill="none" stroke="#fff" stroke-width="5"/><circle cx="24" cy="24" r="6" fill="#fff"/></svg>';
+  if(m.type==="arrive"||m.type==="waypoint") return '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="14" fill="none" stroke="#fff" stroke-width="5"/><circle cx="24" cy="24" r="6" fill="#fff"/></svg>';
   if(m.type==="roundabout"||m.type==="rotary") return '<svg viewBox="0 0 48 48"><circle cx="24" cy="28" r="9" fill="none" stroke="#fff" stroke-width="5"/><path d="M24 19V5M17 11l7-7 7 7" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><text x="24" y="33" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="Barlow Condensed,sans-serif">'+(m.exit||"")+'</text></svg>';
   const rot={straight:0,"slight right":40,right:90,"sharp right":135,uturn:180,"sharp left":-135,left:-90,"slight left":-40}[m.modifier||"straight"]||0;
   const path = m.modifier==="uturn"
@@ -862,7 +971,7 @@ async function startNav(sim){
   S.R = S.routes[S.sel]; S.nav=true; S.lastIdx=0; S.spoken={}; S.alerted={}; S.follow=true;
   closeSheet(); $("top").hidden=true; $("navsign").hidden=false; $("tripbar").hidden=false;
   $("locBtn").classList.add("on"); if(accCircle){ accCircle.remove(); accCircle=null; }
-  document.documentElement.style.setProperty("--sheet-h","84px");
+  setRest();
   S.jamSaid={}; drawNavRoute();
   clearInterval(S.refreshT); S.refreshT=setInterval(refreshTraffic, TRAFFIC_REFRESH_MS);
   try{ S.wake = await navigator.wakeLock?.request("screen"); }catch(e){}
@@ -875,8 +984,8 @@ async function startNav(sim){
 function endNav(){
   S.nav=false; S.freeFollow=false; $("locBtn").classList.remove("on"); resetNorth(); stopSim(); clearInterval(S.refreshT); S.refreshT=null; try{ S.wake?.release(); }catch(e){}
   $("navsign").hidden=true; $("tripbar").hidden=true; $("top").hidden=false;
-  routeLines.forEach(l=>l.remove()); routeLines=[]; if(destMarker) destMarker.remove(); S.dest=null; S.routes=[];
-  document.documentElement.style.setProperty("--sheet-h","24px");
+  routeLines.forEach(l=>l.remove()); routeLines=[]; if(destMarker) destMarker.remove(); S.dest=null; S.routes=[]; S.via=[]; drawStops();
+  setRest();
   if("speechSynthesis" in window) speechSynthesis.cancel();
 }
 $("endBtn").onclick = endNav;
@@ -916,13 +1025,14 @@ function navTick(p){
     return near.along<=a ? s : {...s, delay:s.delay*(b-near.along)/Math.max(1,b-a)};
   }).filter(Boolean);
   const jamMin = Math.round(jamAhead.reduce((a,s)=>a+s.delay,0)/60);
+  S.lastRemain=remain; S.lastLeft=leftSec;
   $("etaClock").textContent=clock(new Date(Date.now()+leftSec*1000));
-  $("etaSub").textContent=fmtDur(leftSec)+" · "+fmtDist(remain)+(R.live? (jamMin>=1? " · traffic +"+jamMin+" min" : " · light traffic") : "");
+  $("etaSub").textContent=fmtDur(leftSec)+" · "+fmtDist(remain)+(R.live? (jamMin>=1? " · +"+jamMin+" min jam" : "") : "");
   $("spd").textContent=Math.round((S.speed||0)*3.6);
   // trip cost = fuel used so far + estimate for what's left
   const used=tripUse(S.drove, Math.max(1,(Date.now()-S.navT0)/1000)), left=tripUse(remain, leftSec);
   const tot=(S.drove>50?used.cost:0)+left.cost, totS=used.sub!=null ? (S.drove>50?used.sub:0)+left.sub : null;
-  $("etaFuel").textContent=(used.ev?"🔌 ":"⛽ ")+"Trip ≈ RM"+tot.toFixed(2)+(totS!=null? " · subsidised RM"+totS.toFixed(2) : "");
+  $("etaFuel").textContent=(used.ev?"🔌 ":"⛽ ")+"RM"+tot.toFixed(2)+(totS!=null? " · BUDI RM"+totS.toFixed(2) : "");
   // voice prompts
   const kmh=(S.speed||0)*3.6, far = kmh>70 ? 1000 : 400;
   if(S.quiet){ S.quiet=false; if(toMan<=far) S.spoken[nxt+"f"]=1; if(toMan<=(kmh>70?250:70)) S.spoken[nxt+"n"]=1; }
@@ -953,7 +1063,7 @@ function jamCheck(near, ahead){
 async function refreshTraffic(){
   if(!S.nav || S.sim || !S.ttKey || !S.pos || S.rerouting || document.hidden) return;
   const R=S.R, near=nearest(R,S.pos,S.lastIdx), oldLeft=timeLeft(R, near.along, stepAt(R,near.i));
-  let nr; try{ nr=(await fetchTomTom(S.pos,S.dest,0))[0]; }catch(e){ return; }
+  S.via=remainingVia(near); let nr; try{ nr=(await fetchTomTom([S.pos,...S.via,S.dest],0))[0]; }catch(e){ return; }
   if(!S.nav) return;
   const save = oldLeft - nr.duration;
   S.R=nr; S.lastIdx=0; S.quiet=true; S.jamSaid={}; drawNavRoute();
@@ -961,8 +1071,9 @@ async function refreshTraffic(){
     say(P().faster(m)); toast((BASE()==="ms"? "Laluan lebih cepat · jimat " : "Switched to a faster route · saves ")+m+" min"); }
   navTick(S.pos);
 }
-async function reroute(p){
+async function reroute(p, keepVia){
   S.rerouting=true; S.lastReroute=Date.now(); sayFun("reroute", P().reroute); toast(P().reroute);
+  if(!keepVia) S.via=remainingVia(); drawStops();
   try{ const rs=await fetchRoutes(p,S.dest,0); S.R=rs[0]; S.lastIdx=0; S.spoken={}; S.jamSaid={}; drawNavRoute();
   }catch(e){ toast("Couldn't recalculate. Keep driving; retrying shortly."); }
   S.rerouting=false;
@@ -1009,7 +1120,7 @@ function openReport(){
   });
   $("cancelRep").onclick=afterSheet;
 }
-function afterSheet(){ if(S.nav){ closeSheet(); document.documentElement.style.setProperty("--sheet-h","84px"); } else if(S.routes.length) renderRouteSheet(); else closeSheet(); }
+function afterSheet(){ if(S.nav){ closeSheet(); setRest(); } else if(S.routes.length) renderRouteSheet(); else closeSheet(); }
 function hazardCheck(p){
   let shown=null;
   S.reports.forEach(r => { const d=hav(p,r);
@@ -1065,7 +1176,7 @@ $("setBtn").onclick=()=>openSettings();
 function renderLayers(){
   let h='<div class="lhead">Map</div><div class="lgrid">';
   Object.entries(MAP_STYLES).forEach(([k,v])=> h+='<button class="sopt'+(k===S.mapStyle?" sel":"")+'" data-st="'+k+'"><i class="sw-'+k+'"></i>'+esc(v.n.replace("Street detail","Detail"))+'</button>');
-  h+='</div><div class="lhead" style="margin-top:12px">Your car</div><div class="lrow"><button data-ci="arrow"'+(S.carIcon!=="car"?' class="sel"':'')+'>➤ Arrow</button><button data-ci="car"'+(S.carIcon==="car"?' class="sel"':'')+'>🚘 Car</button></div>'+(S.ttKey? '<label class="toggle ltraffic"><input type="checkbox" id="trafChk"'+(S.showTraffic?" checked":"")+'> <span>Traffic on all roads</span></label>' : '<p class="hint">Add a TomTom key in ⚙ for live traffic.</p>');
+  h+='</div><div class="lhead" style="margin-top:12px">Your car</div><div class="lrow"><button data-ci="arrow"'+(S.carIcon!=="car"?' class="sel"':'')+'>➤ Arrow</button><button data-ci="car"'+(S.carIcon==="car"?' class="sel"':'')+'>🚘 Car</button></div>'+(S.ttKey && styleKind()==="focus"? '<p class="hint">Focus shows traffic on your route only.</p>' : S.ttKey? '<label class="toggle ltraffic"><input type="checkbox" id="trafChk"'+(S.showTraffic?" checked":"")+'> <span>Traffic on all roads</span></label>' : '<p class="hint">Add a TomTom key in ⚙ for live traffic.</p>');
   $("layers").innerHTML=h;
   $("layers").querySelectorAll(".sopt").forEach(b=> b.onclick=()=>{ S.mapStyle=b.dataset.st; store.set("mapStyle",S.mapStyle); applyMapStyle(); renderLayers(); });
   $("layers").querySelectorAll("[data-ci]").forEach(b=> b.onclick=()=>{ S.carIcon=b.dataset.ci; store.set("carIcon",S.carIcon); applyCarIcon(); renderLayers(); });
@@ -1097,12 +1208,14 @@ function openVoices(msg){
 }
 function preview(){
   const t=P(), f=funOn();
-  const line = joinS(t.inX(spokenDist(400))+t.mod.left+t.onto+"Jalan Ampang", f? pick(f.start) : t.start);
+  const line = joinS(t.inX(spokenDist(400))+(t.ontoFn? t.ontoFn(t.mod.left,"Jalan Ampang") : t.mod.left+t.onto+"Jalan Ampang"), f? pick(f.start) : t.start);
   const wasOn=S.voice; S.voice=true; say(line); S.voice=wasOn;
   const {v,ok}=findVoice(t), m=$("vMsg"); if(!m) return;
   if(!("speechSynthesis" in window)) m.textContent="This browser can't speak. Try Chrome.";
-  else if(!v) m.textContent=S.lang==="canto" ? "No Chinese voice on this phone. Install the Cantonese voice: Settings → General management (or System) → Text-to-speech → Google → Install voice data → Cantonese (Hong Kong)." : "No matching voice found on this phone, so the default voice is used.";
-  else if(!ok) m.textContent="No Cantonese voice on this phone, so a Mandarin voice reads it. Install Cantonese: Settings → Text-to-speech → Google → Install voice data → Cantonese (Hong Kong).";
+  const want={canto:"Cantonese (Hong Kong)", mandarin:"Chinese (Mandarin)", tamil:"Tamil"}[S.lang];
+  const how=" Install it: phone Settings → search “Text-to-speech” → Google → Install voice data → "+want+".";
+  if(!v) m.textContent = want ? "No "+want+" voice on this phone yet."+how : "No matching voice found on this phone, so the default voice is used.";
+  else if(!ok) m.textContent="No "+want+" voice on this phone, so another voice reads it."+how;
   else m.textContent=(t.note? t.note+" " : "")+"Voice: "+v.name+".";
 }
 
@@ -1180,13 +1293,187 @@ function wireFuel(){
 }
 if("speechSynthesis" in window) speechSynthesis.onvoiceschanged=()=>{};
 
+/* ================= trip planner: several stops, total time and cost ================= */
+async function searchPlaces(v, signal){
+  const ll = v.match(/^\s*(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)\s*$/);
+  if(ll) return [{name:"Coordinates", sub:v, lat:+ll[1], lng:+ll[3]}];
+  const c = S.pos || map.getCenter();
+  const url = PHOTON+"?q="+encodeURIComponent(v)+"&limit=6&lat="+c.lat+"&lon="+c.lng+"&bbox="+MY_BBOX.join(",");
+  const j = await (await fetch(url,{signal})).json();
+  return (j.features||[]).map(f => { const p=f.properties;
+    const sub=[p.street&&(p.housenumber?p.housenumber+" ":"")+p.street, p.district||p.locality, p.city, p.state].filter(Boolean);
+    return {name:p.name||p.street||"Unnamed place", sub:[...new Set(sub)].join(", "), lat:f.geometry.coordinates[1], lng:f.geometry.coordinates[0]}; });
+}
+S.plan = Object.assign({stops:[null,null], best:false, round:false}, store.get("plan",{}));
+S.plan.res=null;
+function savePlan(){ store.set("plan",{stops:S.plan.stops, best:S.plan.best, round:S.plan.round}); }
+function openPlanner(prefill){
+  if(prefill){ S.plan.stops=[prefill, null]; S.plan.res=null; }
+  if(!S.plan.stops.length) S.plan.stops=[null];
+  renderPlanner();
+}
+function renderPlanner(){
+  const P1=S.plan, n=P1.stops.length;
+  let h='<div class="dest"><h2>Plan a trip</h2><p>Add the places you want to go. The route, driving time and petrol cost are worked out for you.</p></div><div class="stops">'+
+    '<div class="stop start"><span class="sn">●</span><div class="si"><div class="here">📍 My location</div></div></div>';
+  P1.stops.forEach((st,i)=>{
+    const last=i===n-1 && !P1.round;
+    h+='<div class="stop" data-i="'+i+'"><span class="sn'+(last?" fin":"")+'">'+(last?"🏁":(i+1))+'</span><div class="si">'+
+      '<input id="st'+i+'" type="text" autocomplete="off" enterkeyhint="search" placeholder="'+(last?"Final destination":"Stop "+(i+1))+'" value="'+esc(st?st.name:"")+'">'+
+      '<div class="sres" id="sr'+i+'" hidden></div></div><div class="sbtn">'+
+      '<button data-mv="-1" aria-label="Move up"'+(i===0?" disabled":"")+'>↑</button><button data-mv="1" aria-label="Move down"'+(i===n-1?" disabled":"")+'>↓</button>'+
+      '<button data-rm aria-label="Remove">✕</button></div></div>';
+  });
+  h+='</div><button class="btn small addstop" id="pAdd"'+(n>=8?" disabled":"")+'>+ Add stop</button>'+
+    '<label class="toggle"><input type="checkbox" id="pBest"'+(P1.best?" checked":"")+'> <span>Find the quickest order for my stops</span></label>'+
+    '<label class="toggle"><input type="checkbox" id="pRound"'+(P1.round?" checked":"")+'> <span>Come back to my starting point</span></label>'+
+    '<div class="row"><button class="btn go" id="pCalc">CALCULATE TRIP</button></div><div id="pOut">'+(P1.res? planResult() : '')+'</div>';
+  openSheet(h, closePlanner);
+  document.querySelectorAll(".stop[data-i]").forEach(row=>{
+    const i=+row.dataset.i, inp=$("st"+i), box=$("sr"+i); let tmr, ab;
+    inp.oninput=()=>{ clearTimeout(tmr); const v=inp.value.trim(); if(v.length<3){ box.hidden=true; return; }
+      tmr=setTimeout(async()=>{ ab?.abort(); ab=new AbortController();
+        try{ const list=await searchPlaces(v, ab.signal); box.innerHTML="";
+          if(!list.length){ box.innerHTML='<div class="none">No places found</div>'; }
+          list.forEach(r=>{ const b=document.createElement("button"); b.innerHTML="<b>"+esc(r.name)+"</b><span>"+esc(r.sub)+"</span>";
+            b.onclick=()=>{ P1.stops[i]=r; P1.res=null; inp.value=r.name; box.hidden=true; savePlan(); }; box.appendChild(b); });
+          box.hidden=false; }catch(e){ if(e.name!=="AbortError") toast("Search is unavailable right now."); } }, 350); };
+    row.querySelectorAll("[data-mv]").forEach(b=> b.onclick=()=>{ const j=i+(+b.dataset.mv); [P1.stops[i],P1.stops[j]]=[P1.stops[j],P1.stops[i]]; P1.res=null; savePlan(); renderPlanner(); });
+    row.querySelector("[data-rm]").onclick=()=>{ P1.stops.splice(i,1); if(!P1.stops.length) P1.stops=[null]; P1.res=null; savePlan(); renderPlanner(); };
+  });
+  $("pAdd").onclick=()=>{ P1.stops.push(null); renderPlanner(); setTimeout(()=>$("st"+(P1.stops.length-1))?.focus(),50); };
+  $("pBest").onchange=e=>{ P1.best=e.target.checked; P1.res=null; savePlan(); };
+  $("pRound").onchange=e=>{ P1.round=e.target.checked; P1.res=null; savePlan(); renderPlanner(); };
+  $("pCalc").onclick=calcPlan;
+  if(P1.res){ $("pGo").onclick=()=>startNav(false); $("pSim").onclick=()=>startNav(true); }
+}
+async function calcPlan(){
+  const P1=S.plan, stops=P1.stops.filter(Boolean);
+  if(!stops.length){ $("pOut").innerHTML='<p class="hint">Add at least one place first.</p>'; return; }
+  const start = S.pos ? {...S.pos, name:"My location"} : {...map.getCenter(), name:"Map centre"};
+  const all = P1.round ? [...stops, start] : stops;
+  const dest = all[all.length-1], via = all.slice(0,-1);
+  $("pOut").innerHTML='<p class="hint">Working out your trip…</p>';
+  try{
+    const rs = await fetchRoutes(start, dest, 0, {via, best:P1.best});
+    const R = rs[0];
+    if(R.order && R.order.length===via.length){      // put the stops in the order the route visits them
+      const nv = R.order.map(k=>via[k]); via.splice(0, via.length, ...nv);
+      P1.stops = P1.round ? [...nv] : [...nv, dest]; savePlan(); }
+    S.via=via; S.dest=dest; S.routes=[R]; S.sel=0; P1.res={start, names:[start.name, ...via.map(v=>v.name), dest.name]};
+    if(destMarker) destMarker.remove();
+    destMarker = L.marker(dest,{icon:L.divIcon({className:"",html:'<div class="destpin"></div>',iconSize:[22,22],iconAnchor:[11,11]})}).addTo(map);
+    resetNorth(); drawRoutes(); drawStops(); renderPlanner();
+    map.fitBounds(L.latLngBounds(R.pts), {paddingTopLeft:[30,60], paddingBottomRight:[30, Math.min(sheetH(), innerHeight*0.55)+30]});
+  }catch(e){ $("pOut").innerHTML='<p class="hint">Couldn\'t plan this trip: '+esc(e.message)+'</p>'; }
+}
+function planResult(){
+  const R=S.routes[0], names=S.plan.res.names, u=tripUse(R.distance, R.duration);
+  let h='<div class="tsum"><div><b>'+fmtDist(R.distance)+'</b><span>Distance</span></div><div><b>'+fmtDur(R.duration)+'</b><span>Driving'+(R.live&&R.delay>=60?' (incl. +'+Math.round(R.delay/60)+' min traffic)':'')+'</span></div><div><b>'+clock(new Date(Date.now()+R.duration*1000))+'</b><span>Arrive</span></div></div>'+
+    '<div class="tcost"><div><span>'+(u.ev?"🔌":"⛽")+' '+u.q.toFixed(1)+' '+u.unit+'</span></div><div><b>RM'+u.cost.toFixed(2)+'</b><span>actual price</span></div>'+
+    (u.sub!=null? '<div><b>RM'+u.sub.toFixed(2)+'</b><span>subsidised</span></div>' : '')+'</div><ol class="legs">';
+  (R.legs||[]).forEach((L1,k)=>{ const lu=tripUse(L1.distance, L1.duration);
+    h+='<li><b>'+esc(names[k])+' → '+esc(names[k+1])+'</b><span>'+fmtDist(L1.distance)+' · '+fmtDur(L1.duration)+' · RM'+lu.cost.toFixed(2)+(lu.sub!=null?' (RM'+lu.sub.toFixed(2)+')':'')+'</span></li>'; });
+  h+='</ol><p class="hint">Petrol only; tolls and parking aren\'t included. '+(R.live?"Times include live traffic.":"Times are free-flow estimates.")+'</p>'+
+    '<div class="row"><button class="btn go" id="pGo">GO</button><button class="btn" id="pSim">Simulate</button></div>';
+  return h;
+}
+function closePlanner(){ closeRoute(); }
+
+/* ================= voice commands ================= */
+const ASR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec=null;
+function listen(){
+  if(!ASR){ toast("Voice commands need Chrome on Android."); return; }
+  if(rec){ try{ rec.abort(); }catch(e){} rec=null; hideListen(); return; }
+  try{ speechSynthesis.cancel(); }catch(e){}
+  rec=new ASR(); rec.lang=P().asr||"en-GB"; rec.interimResults=true; rec.maxAlternatives=1;
+  let finalText="";
+  showListen(P().v.listen, "");
+  rec.onresult=e=>{ let t=""; for(const r of e.results){ t+=r[0].transcript; if(r.isFinal) finalText=t; } $("lsText").textContent=t; };
+  rec.onerror=e=>{ hideListen(); rec=null;
+    if(e.error==="not-allowed"||e.error==="service-not-allowed") toast("Microphone blocked. Allow the microphone for this app to use voice commands.");
+    else if(e.error==="no-speech") toast(P().v.didnt); };
+  rec.onend=()=>{ const t=finalText || $("lsText").textContent; rec=null; hideListen(); if(t.trim()) handleCommand(t.trim()); };
+  try{ rec.start(); }catch(e){ rec=null; hideListen(); toast("Couldn't start the microphone."); }
+}
+function showListen(hint, text){ $("listen").hidden=false; $("lsHint").textContent=hint; $("lsText").textContent=text; }
+function hideListen(){ $("listen").hidden=true; }
+function reply(text, toastToo=true){ const was=S.voice; S.voice=true; say(text); S.voice=was; if(toastToo) toast(text); }
+
+const HZ_WORDS = {
+  police:/police|polis|mata|警察|馬打|马打|போலீஸ்/i, accident:/accident|crash|kemalangan|eksiden|车祸|車禍|撞车|撞車|விபத்து/i,
+  flood:/flood|banjir|水灾|水災|水浸|积水|வெள்ளம்/i, pothole:/pothole|lubang|坑|窿|குழி/i, works:/road ?works?|kerja jalan|施工|修路|சாலைப் பணி/i,
+  camera:/camera|kamera|awas|摄像|攝像|相機|相机|கேமரா/i, object:/object|debris|objek|杂物|雜物|பொருள்/i, jam:/\bjam\b|traffic jam|sesak|塞车|塞車|நெரிசல்/i };
+async function handleCommand(raw){
+  const t=raw.replace(/[。．.!！?？]+$/,"").trim(), low=t.toLowerCase(), v=P().v;
+  showListen("", "“"+t+"”"); setTimeout(hideListen, 1200);
+  // end navigation
+  if(/\b(stop|end|cancel|quit)\b.*\b(nav|navigation|navigating|trip|route)\b|^(stop|end|cancel)( it)?$|berhenti|tamatkan|batalkan|停止导航|结束导航|停止導航|結束導航|唔使導航|நிறுத்து/i.test(t)){
+    if(S.nav){ endNav(); reply(v.ended); } else if(S.dest){ closeRoute(); reply(v.ended); } else reply(v.noNav); return; }
+  // arrival time
+  if(/\b(eta|how long|when.*(arrive|reach|get there)|time left)\b|bila sampai|berapa lama|还要多久|還要多久|几时到|幾時到|几点到|幾點到|எப்போது|எவ்வளவு நேரம்/i.test(t)){
+    if(!S.nav) return reply(v.noNav);
+    return reply(v.eta(clock(new Date(Date.now()+S.lastLeft*1000)), fmtDur(S.lastLeft))); }
+  // petrol cost
+  if(/\b(petrol|fuel|gas|cost|how much)\b|minyak|kos|berapa ringgit|油钱|油錢|几多钱|幾多錢|多少钱|பெட்ரோல்|செலவு/i.test(t)){
+    let u; if(S.nav){ const used=tripUse(S.drove,(Date.now()-S.navT0)/1000), left=tripUse(S.lastRemain,S.lastLeft);
+      u={cost:used.cost+left.cost, sub: left.sub!=null? used.sub+left.sub : null}; }
+    else if(S.routes.length){ u=tripUse(S.routes[S.sel].distance, S.routes[S.sel].duration); }
+    else return reply(v.noNav);
+    return reply(v.cost(u.cost.toFixed(2), u.sub!=null? u.sub.toFixed(2) : null)); }
+  // add a stop on the way
+  let m=t.match(/^(?:add (?:a )?stop(?: at)?|stop by|tambah hentian(?: di)?|singgah(?: di)?|加(?:一)?站|加入途经点|中途去|順路去|顺路去)\s*(.+)$/i);
+  if(m){ const place=await firstPlace(m[1]); if(!place) return reply(v.notFound(m[1]));
+    if(S.nav){ S.via=[place, ...remainingVia()]; drawStops(); reply(v.stopAdded(place.name)); S.lastReroute=0; reroute(S.pos||S.R.pts[0], true); }
+    else { if(S.dest){ S.plan.stops=[place, S.dest]; } else { S.plan.stops=[place]; } S.plan.res=null; openPlanner(); calcPlan(); reply(v.stopAdded(place.name)); }
+    return; }
+  // home / work
+  const home=/\b(go |take me |navigate )?home\b|balik rumah|pulang|回家|返屋企|வீட்டுக்கு/i.test(t), work=/\b(to )?(work|office)\b|pejabat|tempat kerja|pergi kerja|公司|上班|返工|வேலைக்கு/i.test(t);
+  if((home||work) && t.length<30){ const k=home?"home":"work"; const pl=S.saved[k];
+    if(!pl) return reply(v.noSaved(home?"Home":"Work")); return voiceGo(pl); }
+  // report a hazard
+  const isReport=/report|lapor|ada |there'?s|got |报告|報告|舉報|举报|前面有|தெரிவி/i.test(t) || !/\s/.test(t);
+  if(isReport){ for(const [k,re] of Object.entries(HZ_WORDS)){ if(re.test(t)){ addReport(k); return reply(v.reported(hzSay(k))); } } }
+  // navigate to a place
+  const pats=[/^(?:please )?(?:navigate|navigation|directions?|drive|take me|bring me|go|let'?s go|head|route)\s*(?:me\s*)?(?:to|towards|for)?\s+(.+)$/i,
+    /^(?:tolong )?(?:bawa saya ke|hantar saya ke|pergi ke|navigasi ke|jalan ke|saya nak pergi(?: ke)?|nak pergi(?: ke)?|ke)\s+(.+)$/i,
+    /^(?:请|請)?(?:导航到|导航去|導航到|導航去|导航|導航|带我去|帶我去|我要去|我想去|揸去|車我去|去|到)\s*(.+)$/,
+    /^(.+?)\s*(?:க்கு|கு)?\s*(?:வழிகாட்டு|போகணும்|போக வேண்டும்|போ|செல்)$/];
+  let place=null; for(const re of pats){ const mm=t.match(re); if(mm){ place=mm[1].trim(); break; } }
+  place = place || t;            // just a place name on its own
+  const hit=await firstPlace(place); if(!hit) return reply(v.notFound(place));
+  voiceGo(hit);
+}
+async function firstPlace(q){ try{ return (await searchPlaces(q))[0]||null; }catch(e){ return null; } }
+/* hands-free: plan the fastest route and start straight away */
+async function voiceGo(place){
+  if(S.nav) endNav();
+  closeSheet(); toggleLayers(false);
+  await setDest(place);
+  if(!S.routes.length || S.dest!==place) return;
+  const R=S.routes[0]; reply(P().v.going(place.name, fmtDur(R.duration)), false);
+  setTimeout(()=>{ if(S.dest===place && !S.nav) startNav(false); }, 2500);
+}
+function addReport(type){
+  const p=S.pos||map.getCenter();
+  S.reports.push({id:Date.now().toString(36), type, lat:p.lat, lng:p.lng, t:Date.now()});
+  store.set("reports",S.reports); drawReports();
+}
+if(ASR){ $("micBtn").onclick=listen; $("navMic").onclick=listen; $("listen").onclick=()=>{ if(rec){ try{ rec.abort(); }catch(e){} } hideListen(); }; }
+else { $("micBtn").hidden=true; $("navMic").hidden=true; }
+
+try{ new ResizeObserver(setRest).observe($("top")); new ResizeObserver(setRest).observe($("tripbar")); }catch(e){}
+addEventListener("resize", setRest);
 /* ================= boot ================= */
+if(!PACKS[S.lang]){ S.lang = ({kelantan:"ms",kedah:"ms",manglish:"en"})[S.lang]||"en"; store.set("lang",S.lang); }
 // move older saved settings (separate subsidised/market fuel types) to the new format
 { const old=S.fuel.type, map={ron95b:"ron95", dieselb:"diesel"};
   if(map[old] || !FUELS[old] || S.fuel.sub===undefined || !("v2" in S.fuel)){ setFuelType(map[old] || (FUELS[old]? old : "ron95")); S.fuel.v2=1; store.set("fuel",S.fuel); }
   if(!CARS[S.fuel.car]) S.fuel.car="custom";
   if(FUELS[S.fuel.type].s==null) S.fuel.sub=null; }
-paintToggles(); paintCompass(); renderChips(); loadReports(); applyMapStyle(); startGPS();setInterval(loadReports, 60000);
+paintToggles(); paintCompass(); renderChips(); loadReports(); applyMapStyle(); startGPS(); setRest();setInterval(loadReports, 60000);
+if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
 if(location.protocol==="file:") setTimeout(()=>toast("Open this page over https (e.g. GitHub Pages) so your phone allows GPS."), 1500);
 </script>
 </body>
